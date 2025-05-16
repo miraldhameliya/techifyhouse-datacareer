@@ -4,6 +4,7 @@ import { companyRouter } from "../routes/company.routes.js";
 import { questionRouter } from "../routes/question.routes.js";
 import { topicRouter } from "../routes/topic.routes.js";
 import { summaryRouter } from "../routes/summary.routes.js";
+import { submissionRouter } from "../routes/submission.routes.js";
 export const router = express.Router();
 
 
@@ -16,3 +17,7 @@ router.use('/question', questionRouter);
 router.use('/topic', topicRouter);
 
 router.use('/summary', summaryRouter);
+
+router.use('/submission', submissionRouter);
+
+

@@ -8,11 +8,14 @@ import {
 } from "../controllers/company.controller.js";
 
 import express from "express";
+import multer from 'multer';
 import { authenticate, authorize } from "../middleware/auth.js";
 
 export const companyRouter = express.Router();
 
-companyRouter.post(`/${ADMIN}/create`,authenticate,authorize('admin'), createCompany);
+const upload = multer();
+
+companyRouter.post(`/${ADMIN}/create`,authenticate,authorize('admin'), upload.single('logo'), createCompany);
 
 companyRouter.put(`/${ADMIN}/update/:id`,authenticate,authorize('admin'), updateCompany);
 

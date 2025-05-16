@@ -8,6 +8,7 @@ import {
   getQuestionById,
   updateQuestion
 } from "../controllers/question.controller.js";
+
 import { authenticate, authorize } from "../middleware/auth.js";
 
 export const questionRouter = express.Router();
@@ -24,9 +25,5 @@ questionRouter.delete(`/${ADMIN}/delete/:id`,authenticate,authorize('admin'), de
 
 
 
-// Filter questions by company
-questionRouter.get('/filterbycompany', filterQuestionsByCompany);
 
-// Get a specific question by ID
-questionRouter.get('/:id', getQuestionById);
 

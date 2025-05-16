@@ -1,9 +1,12 @@
 import { Company } from '../models/Company.js';
 import { createCompanyService, deleteCompanyService, updateCompanyService } from "../services/company.services.js";
+import { saveToCloud } from '../utils/cloudinary.js';
 import { companySchema } from "../validations/company.validation.js";
 
 export const createCompany = async (req, res) => {
   try {
+    console.log('BODY:', req.body);
+    console.log('FILE:', req.file);
     const { error } = companySchema.validate(req.body, { abortEarly: false });
     if (error) {
       return res.status(400).json({
@@ -12,10 +15,28 @@ export const createCompany = async (req, res) => {
       });
     }
 
-    const company = await createCompanyService(req.body);
+    // Parse body fields
+    const { name, domain, category, status } = req.body;
+
+    // File upload handle
+    let logoUrl = null;
+    if (req.file) {
+      // Save to Cloudinary
+      logoUrl = await saveToCloud(req.file, 'companies', name.replace(/\s/g, ''));
+    }
+
+    // Call service with logoUrl
+    const company = await createCompanyService({
+      name,
+      domain,
+      category,
+      status,
+      logoUrl,
+    });
 
     res.status(201).json({ message: 'Company created successfully', company });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: error.message || 'Internal Server Error' });
   }
 };

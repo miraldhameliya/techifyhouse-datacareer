@@ -1,5 +1,5 @@
-import { Company } from "../models/Company.js";
 import { Op } from "sequelize";
+import { Company } from "../models/Company.js";
 
 
 export const createCompanyService = async (data) => {

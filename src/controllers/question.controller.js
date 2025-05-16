@@ -137,30 +137,25 @@ export const filterQuestionsByCompany = async (req, res) => {
     if (variant) questionWhere.dbType = variant;
 
     // Search logic
-    let companySearch = [];
-    let questionSearch = [];
     if (search) {
       questionWhere[Op.or] = [
         { title: { [Op.like]: `%${search}%` } },
         { topic: { [Op.like]: `%${search}%` } }
       ];
     }
-    
-    if (companySearch.length) companyWhere[Op.or] = companySearch;
-    if (questionSearch.length) questionWhere[Op.or] = questionSearch;
 
-    // Fetch companies with all their questions (not required)
+    // Fetch companies with their questions
     const companies = await Company.findAll({
       where: companyWhere,
       attributes: ['id', 'name', 'domain', 'category', 'logoUrl'],
       include: [{
         model: Question,
         as: 'questions',
-        where: Object.keys(questionWhere).length > 0 ? questionWhere : undefined,
+        where: questionWhere,
         attributes: [
           'id', 'title', 'topic', 'dbType', 'difficulty', 'Question', 'schema'
         ],
-        required: false // <-- allow companies with 0 questions
+        required: true // Only get companies that have matching questions
       }],
       order: [
         ['name', 'ASC'],
@@ -168,39 +163,11 @@ export const filterQuestionsByCompany = async (req, res) => {
       ]
     });
 
-    // Filter: only return companies that match search OR have at least one matching question
-    const filteredCompanies = companies
-      .map(company => {
-        // Check if company matches search
-        const companyMatches = search
-          ? (company.name.toLowerCase().includes(search.toLowerCase()) ||
-             company.domain.toLowerCase().includes(search.toLowerCase()))
-          : true;
-
-        let filteredQuestions = company.questions;
-
-        if (search && !companyMatches) {
-          // Only filter questions if company does NOT match
-          filteredQuestions = company.questions.filter(q =>
-            q.title.toLowerCase().includes(search.toLowerCase()) ||
-            q.topic.toLowerCase().includes(search.toLowerCase())
-          );
-        }
-
-        // Only return company if:
-        // - company matches search (show all questions)
-        // - or at least one question matches search
-        if (companyMatches || filteredQuestions.length > 0) {
-          return {
-            ...company.toJSON(),
-            questions: filteredQuestions
-          };
-        }
-
-        return null;
-
-      })
-      .filter(Boolean);
+    // Transform the data to match the required format
+    const filteredCompanies = companies.map(company => ({
+      ...company.toJSON(),
+      questions: company.questions
+    }));
 
     res.json({
       companies: filteredCompanies,
@@ -209,8 +176,6 @@ export const filterQuestionsByCompany = async (req, res) => {
       totalPages: Math.ceil(filteredCompanies.length / limit)
     });
   } catch (error) {
-
-
     res.status(500).json({ message: error.message || 'Internal Server Error' });
   }
 };
