@@ -5,6 +5,7 @@ import { questionRouter } from "../routes/question.routes.js";
 import { topicRouter } from "../routes/topic.routes.js";
 import { summaryRouter } from "../routes/summary.routes.js";
 import { submissionRouter } from "../routes/submission.routes.js";
+import { domainRouter } from "../routes/domain.routes.js";
 export const router = express.Router();
 
 
@@ -19,5 +20,7 @@ router.use('/topic', topicRouter);
 router.use('/summary', summaryRouter);
 
 router.use('/submission', submissionRouter);
+
+router.use('/domain', domainRouter);
 
 

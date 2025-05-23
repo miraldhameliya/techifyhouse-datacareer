@@ -1,7 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/db/mysql.js";
 
-
 export const Question = sequelize.define('Question', {
   title: {
     type: DataTypes.STRING,
@@ -15,9 +14,13 @@ export const Question = sequelize.define('Question', {
       key: 'id'
     }
   },
-  topic: {
-    type: DataTypes.STRING,
-    allowNull: false
+  topicId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'topics',
+      key: 'id'
+    }
   },
   dbType: {
     type: DataTypes.STRING,
@@ -31,21 +34,26 @@ export const Question = sequelize.define('Question', {
     type: DataTypes.ENUM('active', 'inactive'),
     defaultValue: 'active'
   },
-  Question: {
+  questionContent: {
     type: DataTypes.TEXT,
     allowNull: false
   },
-  schema: {
+  schemaContent: {
     type: DataTypes.TEXT,
+    allowNull: true
+  },
+  schemaImage: {
+    type: DataTypes.STRING,
     allowNull: true
   },
   solution: {
     type: DataTypes.TEXT,
     allowNull: true
-  }
+  },
+  query: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+  },
 }, {
   tableName: 'questions'
 });
-
-// If you want to use associations
-// Question.belongsTo(Company, { foreignKey: 'companyId' });

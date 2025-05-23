@@ -5,6 +5,7 @@ import {
   getAllTopics,
   getTopicById,
   updateTopic,
+  userGetAllTopic,
 } from "../controllers/topic.controller.js";
 import express from "express";
 import { authenticate, authorize } from "../middleware/auth.js";
@@ -14,6 +15,8 @@ export const topicRouter = express.Router();
 topicRouter.post(`/${ADMIN}/create`,authenticate,authorize('admin'), createTopic);
 
 topicRouter.get(`/${ADMIN}/all`,authenticate,authorize('admin'), getAllTopics);
+
+topicRouter.get('/userGetAllTopic',authenticate,authorize('user'),userGetAllTopic)
 
 topicRouter.get(`/${ADMIN}/:id`,authenticate,authorize('admin'), getTopicById);
 

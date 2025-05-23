@@ -1,60 +1,62 @@
-import { Op } from "sequelize";
 import { Company } from "../models/Company.js";
+import { CompanyDomains } from "../models/CompanyDomains.js";
+import { Domain } from "../models/Domain.js";
 
+export const createCompany = async (companyData) => {
+  const { name, category, status, logo, domains } = companyData;
 
-export const createCompanyService = async (data) => {
-  const { name, domain, category, status, logoUrl } = data;
-  return await Company.create({ name, domain, category, status, logoUrl });
+  try {
+    // Create company
+    const company = await Company.create({
+      name,
+      category,
+      status,
+      logo
+    });
+
+    // If domains are provided, associate them with the company
+    if (domains && domains.length > 0) {
+      // Add domains to the company
+      await Promise.all(
+        domains.map(async (domainId) => {
+          await CompanyDomains.create({
+            companyId: company.id,
+            domainId: domainId
+          });
+        })
+      );
+    }
+
+    // Fetch the created company with its domains
+    const companyWithDomains = await Company.findOne({
+      where: { id: company.id },
+      include: [{
+        model: Domain,
+        through: { attributes: [] } // This will exclude the join table attributes
+      }]
+    });
+
+    return companyWithDomains;
+  } catch (error) {
+    throw new Error(`Error creating company: ${error.message}`);
+  }
 };
 
-export const updateCompanyService = async (id, data) => {
-  const company = await Company.findByPk(id);
-  if (!company) {
-    throw new Error('Company not found');
+export const getCompanyById = async (id) => {
+  try {
+    const company = await Company.findOne({
+      where: { id },
+      include: [{
+        model: Domain,
+        through: { attributes: [] }
+      }]
+    });
+    return company;
+  } catch (error) {
+    throw new Error(`Error fetching company: ${error.message}`);
   }
-
-  await company.update(data);
-  return company;
 };
 
-export const deleteCompanyService = async (id) => {
-  const company = await Company.findByPk(id);
-  if (!company) {
-    throw new Error('Company not found');
-  }
-
-  await company.destroy();
-  return company;
-};
-
-export const getAllCompaniesService = async (query) => {
-  const { search, category, status, page = 1, limit = 10 } = query;
-
-  // Build where clause
-  let where = {};
-
-  // Search by name or domain (case-insensitive)
-  if (search) {
-    where[Op.or] = [
-      { name: { [Op.like]: `%${search}%` } },
-      { domain: { [Op.like]: `%${search}%` } }
-    ];
-  }
-
-  // Filter by category
-  if (category && category !== 'null') {
-    where.category = category;
-  }
-
-  // Filter by status
-  if (status && status !== 'null') {
-    where.status = status;
-  }
-
-  const offset = (page - 1) * limit;
-  const companies = await Company.findAll({ where, offset: Number(offset), limit: Number(limit) });
-  const total = await Company.count({ where });
-  return { companies, total, page: Number(page), limit: Number(limit) };
-};
+// Your existing updateCompanyService and deleteCompanyService functions...
 
 

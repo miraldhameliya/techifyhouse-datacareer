@@ -5,7 +5,7 @@ import path from 'path';
 import process from 'process';
 import { fileURLToPath } from 'url';
 import { sequelize } from "./config/db/mysql.js";
-import './models/associations.js'; // Import associations
+import './models/index.js';
 import { router } from "./routes/index.js";
 
 
@@ -24,7 +24,12 @@ const PORT = process.env.PORT ?? 30200;
 console.log('call--PORT',process.env.PORT);
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  // origin: 'http://192.168.1.101:3000',
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.urlencoded({ extended: true }));
 
 
@@ -33,7 +38,6 @@ app.use("/api", router);
 app.use((err, req, res, next) => {
   res.status(500).json({ message: "Something went wrong!" });
 });
-
 sequelize.sync().then(() => {
   console.log("✅ Database connected successfully");
   
@@ -41,3 +45,4 @@ sequelize.sync().then(() => {
     console.log(`🔥 Server running on port ${PORT}`);
   });
 });
+

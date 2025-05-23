@@ -1,6 +1,8 @@
 import bcrypt from "bcrypt";
-import { sequelize } from "../config/db/mysql.js";
 import { DataTypes } from "sequelize";
+import { sequelize } from "../config/db/mysql.js";
+import { Question } from "./Question.js";
+import { Submission } from "./Submission.js";
 
 export const User = sequelize.define('User', {
   name: {
@@ -61,4 +63,12 @@ export const User = sequelize.define('User', {
 User.prototype.comparePassword = async function (inputPassword) {
   return await bcrypt.compare(inputPassword, this.password);
 };
+
+
+
+User.hasMany(Submission, { foreignKey: 'userId' });
+Submission.belongsTo(User, { foreignKey: 'userId' });
+
+Question.hasMany(Submission, { foreignKey: 'questionId' });
+Submission.belongsTo(Question, { foreignKey: 'questionId' });
 

@@ -88,13 +88,13 @@ export const loginAdminService = async ({ email, password }) => {
   // Find admin by email and role
   const admin = await User.findOne({ where: { email, role: 'admin' } });
   if (!admin) {
-    throw new Error('Admin not found with this email');
+    throw new Error('Invalid credentials');
   }
 
   // Check password
   const isPasswordValid = await bcrypt.compare(password, admin.password);
   if (!isPasswordValid) {
-    throw new Error('Invalid password');
+    throw new Error('Invalid credentials');
   }
 
   // Update lastLogin and totalAttempted
@@ -114,16 +114,6 @@ export const loginAdminService = async ({ email, password }) => {
   return {
     message: 'Admin login successful',
     token
-    // user: {
-    //   id: admin.id,
-    //   name: admin.name,
-    //   email: admin.email,
-    //   role: admin.role,
-    //   lastLogin: admin.lastLogin,
-    //   totalAttempted: admin.totalAttempted,
-    //   progressSummary: admin.progressSummary,
-    //   status: admin.status
-    // }
   };
 };
 

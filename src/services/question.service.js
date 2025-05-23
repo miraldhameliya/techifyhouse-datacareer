@@ -1,5 +1,5 @@
-import { Question } from "../models/Question.js";
 import { Op } from "sequelize";
+import { Company, Question, Topic } from "../models/index.js";
 
 
 export const createQuestionService = async (data) => {
@@ -12,7 +12,7 @@ export const createQuestionService = async (data) => {
 };
 
 export const getAllQuestionsService = async (query) => {
-  const { search, companyId, dbType, difficulty, status, page = 1, limit = 10 } = query;
+  const { search, companyId, dbType, difficulty, status } = query;
 
   let where = {};
 
@@ -45,10 +45,22 @@ export const getAllQuestionsService = async (query) => {
     where.status = status;
   }
 
-  const offset = (page - 1) * limit;
-  const questions = await Question.findAll({ where, offset: Number(offset), limit: Number(limit) });
-  const total = await Question.count({ where });
-  return { questions, total, page: Number(page), limit: Number(limit) };
+  const questions = await Question.findAll({
+    where,
+    include: [
+      {
+        model: Company,
+        as: 'company',
+        attributes: ['name']
+      },
+      {
+        model: Topic,
+        as: 'topic',
+        attributes: ['name']
+      }
+    ]
+  });
+  return { questions};
 };
 
 export const getQuestionByIdService = async (id) => {

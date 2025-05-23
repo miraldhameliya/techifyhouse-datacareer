@@ -7,7 +7,7 @@ dotenv.config();
 export const authenticate = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
-
+    console.log("authHeader",authHeader);
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ message: 'Authentication token is missing or malformed.' });
     }
@@ -26,6 +26,7 @@ export const authenticate = async (req, res, next) => {
     }
 
     req.user = user;
+    
     next();
   } catch (err) {
     if (err.name === 'TokenExpiredError') {
@@ -49,6 +50,7 @@ export const authorize = (...roles) => {
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({ message: 'You do not have permission to perform this action.' });
     }
+    console.log("req.user.role",req.user.role);
 
     next();
   };

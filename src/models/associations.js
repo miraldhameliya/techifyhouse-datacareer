@@ -1,5 +1,6 @@
 import { Company } from './Company.js';
 import { Question } from './Question.js';
+import { Topic } from './Topic.js';
 
 // Define associations
 Company.hasMany(Question, {
@@ -12,5 +13,16 @@ Question.belongsTo(Company, {
   as: 'company'
 });
 
-export { Company, Question };
+// Topic associations
+Topic.hasMany(Question, {
+  foreignKey: 'topicId',
+  as: 'questions'
+});
+
+Question.belongsTo(Topic, {
+  foreignKey: 'topicId',
+  as: 'topic'
+});
+
+export { Company, Question, Topic };
 

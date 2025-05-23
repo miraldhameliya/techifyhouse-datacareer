@@ -1,31 +1,29 @@
-// const { DataTypes } = require('sequelize');
-// const sequelize = require('../config/db/mysql');
-
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/db/mysql.js";
 
-export const Company = sequelize.define('Company', {
+export const Company = sequelize.define("Company", {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
   name: {
     type: DataTypes.STRING,
-    allowNull: false
-  },
-  domain: {
-    type: DataTypes.STRING,
     allowNull: false,
-    unique: true
   },
   category: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
   },
   status: {
-    type: DataTypes.ENUM('active', 'inactive'),
-    defaultValue: 'active'
+    type: DataTypes.ENUM("Active", "Inactive"),
+    defaultValue: "Active",
   },
-  logoUrl: {
+  logo: {
     type: DataTypes.STRING,
-    allowNull: true
+    allowNull: false,
   }
 }, {
-  tableName: 'companies'
+  tableName: 'companies',
+  timestamps: true
 });

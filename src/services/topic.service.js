@@ -7,20 +7,17 @@ export const createTopicService = async (data) => {
 
 export const getAllTopicsService = async (query) => {
   const { search } = query;
-  const page = Number(query.page) || 1;
-  const limit = Number(query.limit) || 10;
+
   let where = {};
   
   if (search) {
     where[Op.or] = [
       { name: { [Op.like]: `%${search}%` } },
-      { relatedDomain: { [Op.like]: `%${search}%` } }
     ];
   }
 
-  const offset = (page - 1) * limit;
-  const { count, rows: topics } = await Topic.findAndCountAll({ where, offset, limit });
-  return { topics, total: count, page, limit };
+  const topics = await Topic.findAll({ where });
+  return { topics };
 };
 
 export const getTopicByIdService = async (id) => {
