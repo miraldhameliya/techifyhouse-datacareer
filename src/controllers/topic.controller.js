@@ -58,7 +58,7 @@ export const getAllTopics = async (req, res) => {
         'name',
         'createdAt',
         'updatedAt',
-        [sequelize.literal('(SELECT COUNT(*) FROM Questions WHERE Questions.topicId = Topic.id)'), 'questionCount']
+        [sequelize.literal('(SELECT COUNT(*) FROM questions WHERE questions.topicId = Topic.id)'), 'questionCount']
       ],
       order: [
         ['name', 'ASC'] // Order by name in ascending order
