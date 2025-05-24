@@ -1,8 +1,7 @@
-
-
+import { Op } from "sequelize";
+import { User } from "../models/User.js";
 import { loginAdminService, loginUserService, registerUserService } from "../services/auth.service.js";
 import { loginSchema, registerSchema } from "../validations/auth.validation.js";
-
 
 export const  signup = async (req, res) => {
   try {
@@ -83,6 +82,33 @@ export const logout = async (req, res) => {
   try {
     res.clearCookie('token');
     res.status(200).json({ message: 'Logged out successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message || 'Internal Server Error' });
+  }
+};
+
+export const getAllUsers = async (req, res) => {
+  try {
+    const { search, status } = req.query;
+    const where = { role: 'user' };
+
+    if (search) {
+      where[Op.or] = [
+        { name: { [Op.like]: `%${search}%` } },
+        { email: { [Op.like]: `%${search}%` } }
+      ];
+    }
+
+    if (status) {
+      where.status = status;
+    }
+
+    const users = await User.findAll({
+      where,
+      attributes: ['id', 'name', 'email', 'totalAttempted', 'lastLogin', 'status']
+    });
+    res.status(200).json({ users });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message || 'Internal Server Error' });
