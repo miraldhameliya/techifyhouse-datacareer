@@ -54,6 +54,10 @@ export const Question = sequelize.define('Question', {
     type: DataTypes.TEXT,
     allowNull: false,
   },
+  solutionQuery: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  }
 }, {
   tableName: 'questions'
 });

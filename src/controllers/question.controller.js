@@ -22,6 +22,13 @@ export const createQuestion = async (req, res) => {
       }
     }
 
+    // Validate solution query from request body
+    if (!req.body.solutionQuery) {
+      return res.status(400).json({
+        message: "Solution query is required"
+      });
+    }
+
     const company = await sequelize.models.Company.findByPk(req.body.companyId);
     if (!company) {
       return res.status(400).json({ message: "Invalid companyId: No matching company found" });
@@ -46,6 +53,8 @@ export const createQuestion = async (req, res) => {
     try {
       await sequelize.query(createTable);
       await sequelize.query(addData);
+      // Test the solution query
+      await sequelize.query(req.body.solutionQuery);
     } catch (sqlErr) {
       return res.status(400).json({
         message: "SQL Error while executing query",
@@ -64,6 +73,7 @@ export const createQuestion = async (req, res) => {
       ...req.body,
       schemaImage: schemaImageUrl,
       query: JSON.stringify(req.body.query),
+      solutionQuery: req.body.solutionQuery
     };
 
 
@@ -194,24 +204,20 @@ export const updateQuestion = async (req, res) => {
       return res.status(404).json({ message: "Question not found" });
     }
 
-    // Extract table name from the old query
-    const oldQuery = JSON.parse(question.query);
-    const oldMatch = oldQuery.createTable.match(/CREATE TABLE(?: IF NOT EXISTS)? (\w+)/i);
-    
-    // Extract table name from the new query
-    const { createTable, addData } = req.body.query;
-    const newMatch = createTable.match(/CREATE TABLE(?: IF NOT EXISTS)? (\w+)/i);
-
-    // Drop the old table if it exists
-    if (oldMatch) {
-      const oldTableName = oldMatch[1];
-      await sequelize.query(`DROP TABLE IF EXISTS ${oldTableName}`);
+    // Validate solution query from request body
+    if (!req.body.solutionQuery) {
+      return res.status(400).json({
+        message: "Solution query is required"
+      });
     }
 
-    // Create new table and add data
+    const { createTable, addData } = req.body.query;
+
     try {
       await sequelize.query(createTable);
       await sequelize.query(addData);
+      // Test the solution query
+      await sequelize.query(req.body.solutionQuery);
     } catch (sqlErr) {
       return res.status(400).json({
         message: "SQL Error while executing query",
@@ -219,7 +225,7 @@ export const updateQuestion = async (req, res) => {
       });
     }
 
-    let schemaImageUrl = question.schemaImage; // Keep existing image by default
+    let schemaImageUrl = question.schemaImage;
     if (req.file) {
       schemaImageUrl = await saveToCloud(req.file, 'questions', req.body.companyId || 'general');
     }
@@ -228,6 +234,7 @@ export const updateQuestion = async (req, res) => {
       ...req.body,
       schemaImage: schemaImageUrl,
       query: JSON.stringify(req.body.query),
+      solutionQuery: req.body.solutionQuery
     };
 
     const updatedQuestion = await updateQuestionService(req.params.id, data);

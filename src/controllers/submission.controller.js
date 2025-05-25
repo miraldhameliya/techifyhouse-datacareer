@@ -39,76 +39,6 @@ export const runUserQuery = async (req, res) => {
   });
 };
 
-// export const submitQuery = async (req, res) => {
-//   const { questionId, code } = req.body;
-//   const userId = req.user?.id;
-//   if (!userId || !questionId || !code) {
-//     return res.status(400).json({ status: "failure", error: "Missing required fields." });
-//   }
-
-//   const submittedAt = new Date();
-//   const start = performance.now();
-//   let result = null;
-//   let error = null;
-//   let status = "success";
-//   let score = 0;
-
-//   try {
-//     const [data] = await sequelize.query(code);
-//     result = data;
-//   } catch (err) {
-//     status = "error";
-//     error = err.message;
-//   }
-
-//   const runTime = Math.floor(performance.now() - start);
-
-//   const question = await Question.findByPk(questionId);
-//   const expectedResult = question?.expectedResult ? JSON.parse(question.expectedResult) : null;
-
-//   // Score and pass/fail logic
-//   if (status !== "error") {
-//     if (JSON.stringify(result) === JSON.stringify(expectedResult)) {
-//       status = "passed";
-//       score = 100;
-//     } else {
-//       status = "failed";
-//       score = 0;
-//     }
-//   } else {
-//     status = "failed";
-//     score = 0;
-//   }
-
-//   const submission = await Submission.create({
-//     userId,
-//     questionId,
-//     code,
-//     status,
-//     result: result ? JSON.stringify(result) : null,
-//     error,
-//     runTime,
-//     submittedAt,
-//     isFinal: true,
-//     score,
-//   });
-
-//   const user = await User.findByPk(userId);
-
-//   return res.status(200).json({
-//     user: user ? user.email : null,
-//     question: question ? question.title : null,
-//     dbType: question ? question.dbType : null,
-//     score: `${score}%`,
-//     status,
-//     dateTime: submittedAt.toISOString().replace('T', ' ').substring(0, 19), // "YYYY-MM-DD HH:mm:ss"
-//     submissionId: submission.id,
-//     // Optionally include these for debugging:
-//     // data: result,
-//     // error,
-//     // runTime,
-//   });
-// };
 
 
 export const submitQuery = async (req, res) => {
@@ -126,13 +56,24 @@ export const submitQuery = async (req, res) => {
     let error = null;
     let status = 'passed';
     let score = 0;
-
+    const question = await Question.findByPk(questionId);
+    if (!question || !question.solutionQuery) {
+      return res.status(404).json({ message: "Solution not found for this question." });
+    }
+    const solutionQuery = question.solutionQuery;
     try {
-      const [data] = await sequelize.query(code);
-      result = data;
-
+      const [userResult] = await sequelize.query(code);
+      const [solutionResult] = await sequelize.query(solutionQuery);  
+      const stringify = JSON.stringify; 
+      if(stringify(userResult) === stringify(solutionResult)){
+        result = userResult;
+        score = 100;
+      }else{
+        status = 'mismatch';
+        error = "Your query's output doesn't match with the solution's output!";
+        score = 0;
+      }
       // Example scoring logic (adjust as needed)
-      score = 100;
     } catch (err) {
       status = 'error';
       error = err.message;
@@ -155,7 +96,9 @@ export const submitQuery = async (req, res) => {
     });
 
     return res.status(200).json({
-      message: "Submission saved successfully.",
+      message: status === 'passed' ? "Correct answer!" :
+      status === 'mismatch' ? "Your query's output doesn't match with the solution's output!" :
+      "There was an error while executing your query.",
       submission,
     });
   } catch (e) {
@@ -241,3 +184,56 @@ export const getAllSubmissions = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch submissions", error: error.message });
   }
 };
+
+// export const submitQuery = async (req, res) => {
+//   try {
+//     const userId = req.user?.id;
+//     const { questionId, code, dbType } = req.body;
+
+//     if (!userId || !questionId || !code || !dbType) {
+//       return res.status(400).json({ message: "Missing required fields." });
+//     }
+
+//     const submittedAt = new Date();
+//     const start = performance.now();
+//     let result = null;
+//     let error = null;
+//     let status = 'passed';
+//     let score = 0;
+
+//     try {
+//       const [data] = await sequelize.query(code);
+//       result = data;
+
+//       // Example scoring logic (adjust as needed)
+//       score = 100;
+//     } catch (err) {
+//       status = 'error';
+//       error = err.message;
+//       score = 0;
+//     }
+
+//     const runTime = Math.floor(performance.now() - start);
+
+//     const submission = await Submission.create({
+//       userId,
+//       questionId,
+//       code,
+//       dbType,
+//       score,
+//       status,
+//       result,
+//       error,
+//       runTime,
+//       submittedAt,
+//     });
+
+//     return res.status(200).json({
+//       message: "Submission saved successfully.",
+//       submission,
+//     });
+//   } catch (e) {
+//     console.error("SubmitQuery Error:", e);
+//     return res.status(500).json({ message: "Something went wrong!", error: e.message });
+//   }
+// };

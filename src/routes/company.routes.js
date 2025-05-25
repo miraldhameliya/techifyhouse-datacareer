@@ -6,9 +6,6 @@ import {
   getAllCompanies,
   updateCompany,
   userGetAllCompanies,
-  // deleteCompany,
-  // getAllCompanies,
-  // updateCompany,
 } from "../controllers/company.controller.js";
 
 import express from "express";

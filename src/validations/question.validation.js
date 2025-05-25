@@ -14,7 +14,8 @@ export const questionSchema = Joi.object({
   query: Joi.object({
     createTable: Joi.string().required(),
     addData: Joi.string().required()
-  }).required()
+  }).required(),
+  solutionQuery: Joi.string().allow('', null)
   
   
 });

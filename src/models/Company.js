@@ -22,6 +22,10 @@ export const Company = sequelize.define("Company", {
   logo: {
     type: DataTypes.STRING,
     allowNull: false,
+  },
+  solutionQuery: {
+    type: DataTypes.TEXT,
+    allowNull: true,
   }
 }, {
   tableName: 'companies',

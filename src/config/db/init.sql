@@ -34,7 +34,8 @@ CREATE TABLE questions (
   schema TEXT,
   solution TEXT,
   FOREIGN KEY (companyId) REFERENCES companies(id),
-  FOREIGN KEY (topicId) REFERENCES topics(id)
+  FOREIGN KEY (topicId) REFERENCES topics(id),
+  solutionQuery TEXT
 );
 
 CREATE TABLE submissions (
