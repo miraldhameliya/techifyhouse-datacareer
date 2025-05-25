@@ -159,7 +159,8 @@ export const getQuestionById = async (req, res) => {
         'solution',
         'query',
         'createdAt',
-        'updatedAt'
+        'updatedAt',
+        'solutionQuery'
       ]
     });
 
