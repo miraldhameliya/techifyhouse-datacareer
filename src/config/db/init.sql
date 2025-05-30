@@ -59,3 +59,16 @@ CREATE TABLE company_domains (
   FOREIGN KEY (companyId) REFERENCES companies(id),
   FOREIGN KEY (domainId) REFERENCES domains(id)
 );
+
+CREATE TABLE IF NOT EXISTS dynamictables (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tableName VARCHAR(255) NOT NULL UNIQUE,
+    createTableQuery TEXT NOT NULL,
+    insertDataQuery TEXT NOT NULL,
+    status ENUM('pending', 'completed', 'failed') DEFAULT 'pending',
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+SELECT id FROM dynamictables;
+

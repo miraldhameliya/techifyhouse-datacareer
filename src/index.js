@@ -5,6 +5,7 @@ import path from 'path';
 import process from 'process';
 import { fileURLToPath } from 'url';
 import { sequelize } from "./config/db/mysql.js";
+import './models/associations.js';
 import './models/index.js';
 import { router } from "./routes/index.js";
 
